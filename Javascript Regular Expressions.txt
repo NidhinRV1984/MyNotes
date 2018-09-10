@@ -1,0 +1,819 @@
+Regular Expressions
+==========================================================================================
+Source: Jörg Krause (auth.)-Introducing Regular Expressions_ JavaScript and TypeScript-Apress (2017)-print
+	
+Using regular expressions, you look for a matching substring in a larger text.
+	would return either true or false.
+	can return groups of parts that have been found.
+
+		Note: Pattern.test(string) - returns true if the string contains the pattern
+			  Pattern.exec(String) returns first match
+			  use string.match(pattern) if you want to see the matching pattern
+			  
+			  The following String functions are enhanced to handle expressions:
+				  search -> returns index of the match found, 
+				  replace
+				  match -> returns the match array
+				  split
+	  
+	  
+Note: Javascript test console that is available online -> repl.it
+	repl - read-eval-print-loop
+
+
+Basic parts
+------------
+ˆ at the beginning
+	ˆx - match the letter “x” only if it appears at the very first character.
+$  where the pattern ends.
+* no or any number of characters.
++ one or any number of characters.
+? no or one character.
+[] one character out of group of letters or digits
+	[a-z] uppercase letters, lowercase letters, or digits
+() groups characters
+{} repetition marker for character before the braces.
+	({3,7})
+\ metacharacters and special characters
+. exactly one character
+	Note: actually need a literal dot => \.
+	
+Examples
+----------
+Basic email Id validation
+---------------------------
+^[_a-zA-Z0-9-]+       must have at least one character
+(\.[_a-zA-Z0-9-]+)*   might be followed by an actual dot plus more characters \. - optional and can be repeated endlessly
+@
+[a-zA-Z0-9-]+\.([a-zA-Z]{2,3})$
+	underscore character may not appear in regular domain names
+	dot is not optional
+	remaining part can be two or three characters long
+	
+Characters, Lines, and Text
+============================
+Lines end with a line break
+regular expressions handle lines explicitly
+if you have text that doesn’t contain any line breaks, you don’t need the metacharacters for line begin and end
+
+Metacharacters
+==============
+Within a regular expression, you can define special properties with metacharacters
+	e.g ˆ for the beginning and $ for the end position in the search text.
+
+Note: If you want to look for a metacharacter as a regular character, you have to put a backslash in front of it: (Known as escaping)
+	e.g \$, \ˆ
+	backslash destroys the special meaning
+		backslash itself is a metacharacter
+			If you look for the backslash in particular, you write \\.
+			
+Literals
+=========
+numbers, operators, or text
+Regular expressions in JavaScript use / (forward slash) as a literal character.
+	/[abc]/
+	/abc/
+expression can be assigned to a variable or used directly as a parameter.
+	var patt = /abc/;
+	var s = /abc/.toString();
+	console.log(s);
+	
+Character Classes
+==================
+If you look for strings or single characters, it’s often very efficient to use character classes.
+Character classes are written in square brackets, such as [abc]
+	looks for one character out of the class
+	[abc] - either a, or b, or c
+		neither ab nor bc
+
+Groups are built by a dash and multiple groups are simply written
+	[0-9]
+	[0-9a-zA-Z]
+	
+	[aeiou] defines a vowel in English
+	[a-f] defines the letters a, b, c, d, e, f (lowercase only)
+	[a-fA-F0-9] defines all digits for hexadecimal numbers
+	expressions [a-fA-F] and [A-Fa-f] are identical.
+
+	var patt = /[a-f]+/;
+	console.log(patt.test("Auto"));
+	console.log(patt.test("42"));
+	console.log(patt.test("12 Days"));
+	console.log(patt.test("borrow"));
+
+
+Digits -> [0-9]
+digits of octal numbers -> [0-7]
+decimal numbers with a sign and decimal point ->  [0-9+-.]
+hexadecimal digits -> [a-fA-F0-9]
+Date and Time
+	[0-9/] -> 	4/22/2016
+	[0-9:] -> 7:44
+	[0-9:amp] 
+		Time with “am” or “pm”
+		Bug: it allows “a9” or “p0m”.
+
+Any character in the class will be treated “as is” and loses its special meaning as a metacharacter.
+
+Negations
+---------
+using the metacharacter ˆ.
+	[ˆ0-9] includes everything but digits
+	[ˆaeiou] defines all consonants, but also a lot more, such as digits.
+IMP NOTE: ˆ works only if it is the very first character after the opening bracket. If it is somewhere else in the class, it’s just a common character
+of its own
+
+Using character classes in Strings
+-----------------------------------
+[gG]reen, [rR]ed
+M[ae][iy]er matches “Meyer”, “Mayer”, “Maier”, and “Meier”.
+
+Abbreviations for common characters
+===================================
+\t
+\n
+\r
+\f
+\v
+\s -> White space
+	includes \t, space, \n, \r, \f)
+\S -> Negation of \s
+\w -> Word character
+	[_a-zA-Z0-9]
+\W -> The negation of \w
+\d -> Digits, like [0-9]
+\D -> Negation of \d
+\b -> Word boundary, start, or end of a word
+\B -> Negation of \b
+\0 -> Nul (nil) character
+\xxx -> octal number
+\xdd -> hexadecimal number
+\uxxxx -> Unicode character
+\cxxx -> ASCII value
+
+
+References
+==========
+Parts of successfully found text portions are stored in temporary memory cells. 
+You can reference to them later in the same expression.
+The references use a backslash followed by the storage location.
+	like \4, for example.
+	
+	
+Metacharacters
+==============
+Start, End, and Boundaries
+----------------------------
+ˆ is the beginning (or start)
+$ is the end
+\b defines the boundary of a word
+\B defines no boundary
+
+Note: ^ is the beginning of the line while \b is the beginning of the word
+
+	var patt = /^auto$/;
+	console.log(patt.test("auto"));
+	console.log(patt.test("automatic"));
+	var patt2 = /auto/;
+	console.log(patt2.test("That's our automobile, it's an BMW."));
+
+
+Word boundaries
+----------------
+A word in Latin text ends with the appearance of a space or punctuation, such as a
+comma, semicolon, or period.
+special symbol \b looks for such a transition
+expression /\bco recognizes “co” in the sentence “It is complicated.”
+The space before the “co…” creates the word boundary.
+
+
+Any Character
+---------------
+. is any character, exactly
+	.uto looks for “auto”, “Auto”, “automatic
+	
+	“distributor”.match(/.uto/) - buto.
+	/.uto/.test("distributor") - true
+	
+		var patt = /.uto/;
+		console.log(patt.test("auto"));
+		console.log(patt.test("automatic"));
+		console.log(patt.test("distributor")
+		
+Note: for empty lines in a file - ˆ$
+
+
+repetition operator
+===================
+use a repetition operator to tell the expression engine to look for more appearances of the characters
+
+a* defines no or any occurrence of "a", such as "a", "aaaa", and so on.
+a+ defines one or any number of "a", such as "a", "aa", and so on.
+a? defines no or one "a", such as "" or "a" exactly.
+
+{num} The exact number
+{min, max} 
+{,max} -> (zero to max)
+{min,} -> min to any number
+{,} means *
+{0,1} means ?
+{1,} means +
+
+e.g checks whether the zip codes entered by the user
+	var pattern = /^[0-9]{5}$/;
+	//exactly five digits
+	var zip = "12683";
+	var checkzip = pattern.exec(zip);
+	if(!checkzip) 
+		//do action
+	Note: Pattern.exec(String) returns an array of matches
+	
+Special Operators
+=================
+or operator
+-----------
+/green|red/ matches “green” in “green apple” and “red” in “red apple”, but it does not match “red or green apple”.
+
+References
+===========
+These numbered parts reference groups of characters found earlier in the search text. 
+Groups that count are written in parentheses (…)
+	just count the opening (left) parentheses
+referenced by \1, the second by \2, and so on.
+	e.g /apple(,)\sorange\1/ will match “apple, orange,” in the string “apple, orange, cherry, peach”.
+ 
+Note: JavaScript supports up to nine references.
+
+Note: Within character classes, you cannot use references. that’s because the backslash has no special meaning herein
+however, the part that is being formed by a character class can be put in parentheses and act as a reference
+
+
+Groups
+==========
+groups used for references can be used for repetition operators, too
+
+Simple Groups
+-------------
+to repeat a group of characters, just use parentheses: (ab)+
+	"abc", "abcabc"
+		not in "aacbb".
+		
+	var patt = /(ab)+/; 
+	console.log(patt.test("abc")); 
+	console.log(patt.test("abcabc")); 
+	console.log(patt.test("aacbb"));
+
+Example 	
+	'Word'
+	/^(["']){1}.*\1$/
+
+	Instead of quotes, we’re looking for two identical words:
+	:/\b((\w+)\s+\2)+/
+		\2 refers to the second opening parenthesis.
+	“Word Word”
+	‘Word Word’
+
+Non-Counting Groups
+--------------------
+(?:)
+Means this group is not assigned a temporary memory location. Hence this cannot be referenced using \1, \2 etc
+
+	Consider the following text:
+
+	http://stackoverflow.com/
+	https://stackoverflow.com/questions/tagged/regex
+	Now, if I apply the regex below over it...
+
+	(https?|ftp)://([^/\r\n]+)(/[^\r\n]*)?
+	... I would get the following result:
+
+	Match "http://stackoverflow.com/"
+		 Group 1: "http"
+		 Group 2: "stackoverflow.com"
+		 Group 3: "/"
+
+	Match "https://stackoverflow.com/questions/tagged/regex"
+		 Group 1: "https"
+		 Group 2: "stackoverflow.com"
+		 Group 3: "/questions/tagged/regex"
+	But I don't care about the protocol -- I just want the host and path of the URL. So, I change the regex to include the non-capturing group (?:).
+
+	(?:https?|ftp)://([^/\r\n]+)(/[^\r\n]*)?
+	Now, my result looks like this:
+
+	Match "http://stackoverflow.com/"
+		 Group 1: "stackoverflow.com"
+		 Group 2: "/"
+
+	Match "https://stackoverflow.com/questions/tagged/regex"
+		 Group 1: "stackoverflow.com"
+		 Group 2: "/questions/tagged/regex"
+	See? The first group has not been captured. The parser uses it to match the text, but ignores it later, in the final result.
+
+
+Lookahead References
+--------------------
+Sometimes a match is valid, if another character follows
+?= A positive lookahead; the following character must match
+?! A negative lookahead; the following character must not match
+	var patt = /(\d{1,3})(?=d)/;
+	var text = "Duration: 16d";
+	var test = patt.exec(text);
+	console.log("Days: " + test[0]);
+	Note: The letter “d” itself is not part of the match—it just has to be there to make the digits match.
+
+IMP Note: Javascript does not support lookbehind references
+
+Example
+	const people = `
+		- Bob (vegetarian)
+		- Billa (vegan)
+		- Francis
+		- Elli (vegetarian)
+		- Fred (vegan)
+		`;
+
+const regex = /-\s(\w+?)\s(?=\(vegan\))/g;
+// finds all people who are vegan
+
+let result = regex.exec(people);
+
+while(result) {
+  console.log(result[1]);
+  result = regex.exec(people);
+}
+
+Now how to find people who are not vegan?
+const regex = /-\s(\w+)\s(?!\(vegan\))/g
+
+Note: When you capture a group and want to look in advance ahead what follows,you can use look ahead references
+
+
+Execution Options
+====================
+modify the behavior of the regex engine.
+	var pattern = /[A-Z]/i;
+i: Searches case insensitive
+g: Searches globally, even if a hit was already found
+m: Searches over multiple lines (without this, a line end stops the search)
+
+
+g
+--
+	Use Option g if you expect multiple hits, which means “global” and continues searching after the first hit.
+		var text = "Than Ann answers all questions again.";
+		var patt = /a/g;
+		var match = patt.exec(text);
+		console.log(match[0] + " found at " + match.index);
+		match = patt.exec(text); 
+		do { 
+			match = patt.exec(text); 
+			if (!match) break;
+			console.log(match[0] + " found at " + match.index);
+		} while(true);
+
+
+
+The JavaScript Regular Expression Functions
+==========================================================================================	
+The RegExp Object
+-----------------
+JavaScript provides an object named RegExp. You can create an instance
+by using new or the literal //.
+
+Methods
+-------
+exec(): Executes the test and returns the first hit.
+test(): Executes the test and returns either true or false.
+toString(): Returns the expression as a string.
+
+	exec()
+	------
+	exec method returns an object that has the following content
+		An array with the groups
+			first capture is in index [0]
+			more groups, these follow in [1] .. [n]
+		property named index contains the position of the first hit
+		property named input contains the searched text.
+	
+	/web/i.exec("Look for our Web courses!");
+		will return an object with the hit “Web” at first position and the value 13 for the index.
+	
+	If there is no hit, exec simply returns null
+	Imp Note:  Use if(//.exec("")) to handle this, because JavaScript will treat null as false
+
+constructor: 
+	A function that creates the RegExp object Using the new operator
+	var patt = new RegExp("web");.
+	var expresn = new RegExp(/abc/)
+	
+	Note: You need not use constructor to create a regular expression.easiest way to create an expression:
+		The Literal Form
+		var patt = /web/i;
+		patt.test("Look for our Web courses!");
+	
+Properties
+-----------
+global: Checks for option g 
+	returns a (Boolean)
+ignoreCase: Checks for option i , case insensitive.
+	returns a (Boolean)
+lastIndex: Index of the last hit.
+multiline: Checks for option m , multiline
+	returns a (Boolean)
+source: The expression itself.
+
+	var expresn = new RegExp(/abc/)
+	expresn.test("abcuradi")
+	//true
+	expresn.lastIndex
+	expresn.global
+
+Dynamic Properties
+------------------
+If there are groups in the expression, they appear as dynamic properties.
+The names are $1 to $9, respectively
+
+Note: If you don’t want a group being catched this way, consider using a non-counting group (?:).
+
+	var patt = /(abc)|(def)/;
+	var text = "anton def";
+	console.log(patt.test(text));
+	console.log(RegExp.$1);
+
+String Functions
+==========================================================================================	
+Regular expressions are not limited to the RegExp object
+The following functions are enhanced to handle expressions:
+search, replace,match, split
+
+	var str = "Look for our Web courses!";
+	var res = str.search(/Web/i);
+	console.log(res);
+	//res variable contains 13. That’s the index of the hit. 
+	//Without a hit, you get –1.
+	
+If you need a Boolean value, just use match:
+	var str = "Look for our Web courses!"; 
+	var res = str.match(/Web/);
+	if (res) {
+		console.log("Hit");
+	} else {
+	console.log("No Hit");
+	}
+	//returns an array of the matches found
+		
+	var str = "Look for our Web courses!";
+	var res = str.replace(/Web/i, ".NET");
+	console.log(res);
+
+
+Examples of Patterns in real life
+==========================================================================================	
+Web and Network
+=================
+HTML Tags
+=========
+1. Div tags
+-----------
+	/<DIV\b[ˆ>]*>(.*?)<\/DIV>/i
+for any tag:
+------------
+/<([A-Z][A-Z0-9]*)\b[ˆ>]*>(.*?)<\/\1>/i
+
+		var patt = /<([A-Z][A-Z0-9]*)\b[^>]*>(.*?)<\/\1>/i;
+		var html = "Ww want write <b>bold</b> and <i>italic</i> here";
+		console.log(patt.exec(html));
+		
+IP Addresses
+=============
+\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b
+bug: also does for 999.999.999.999 -> not a valid IP
+
+More accurate  implementation
+---------------------------
+The unit goes from 0 to 9, but if the hundreds are greater than 250, it only
+goes from 0 to 5. For the tens, it’s similar: 0 to 9, or for numbers from 200,
+it’s 0 to 5
+/\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.
+(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\. (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.
+(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/
+dealing with number ranges is not the strength of regular expressions
+\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}
+(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/
+
+
+MAC addresses 
+=============
+are hardware-related identifiers that usually identify network endpoints.
+It’s a 48-bit number that manufacturers burn into the hardware.
+some hardware allows this number to be overwritten by software or settings, so it can be spoofed
+
+general form:
+--------------
+two hexadecimal digits, divided by colons, spaces,dashes, or even nothing
+e.g CB:35:2F:00:7C:A1
+
+/ˆ[0-9A-F]{2}([-: ]?[0-9A-F]{2}){5}$/i
+
+to return all parts as groups
+/^([\dA-F]{2})[-: ]? ([\dA-F]{2})[-: ]? ([\dA-F]{2})[-: ]? ([\dA-F]{2})[-: ]?
+([\dA-F]{2})[-: ]? ([\dA-F]{2})$/i
+
+To get access to the groups’ content
+	var patt = /^([\dA-F]{2})[-: ]?([\dA-F]{2})[-: ]?([\dA-F]{2})[-: ]?(\ 2 [\dA-F]{2})[-:
+	]?([\dA-F]{2})[-: ]?([\dA-F]{2})$/i;
+	var mac = "CB:35:2F:00:7C:A1";
+	mac = patt.exec(mac)
+	for(i = 1; i < mac.length; i++) { 
+	console.log(mac[i]); 7 }
+	
+	
+URL
+=====
+/ˆ([Hh][Tt][Tt][Pp][Ss]?|[Ff][Tt][Pp]):\/\/(.+)$/
+
+more comprehensive form
+------------------------
+var patt = /^((([hH][tT][tT][pP][sS]?|[fF][tT][pP])\:\/\/)?([\w\.\-]\ 2 +(\:[\w\.
+\&%\$\-]+)*@)?((([^\s\(\)\<\>\\\"\.\[\]\,@;:]+)(\.[^\s\(\)\\ 3 <\>\\\"\.\[\]\,
+@;:]+)*(\.[a-zA-Z]{2,4}))|((([01]?\d{1,2}|2[0-4]\d|25\ 4 [0-5])\.){3}([01]?\d{1,
+2}|2[0-4]\d|25[0-5])))(\b\:(6553[0-5]|655[0-2\ 5
+]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)\b)?((\/[^\/]\ 6 [\w\.\,
+\?\'\\\/\+&%\$#\=~_\-@]*)*[^\.\,\?\"\'\(\)\[\]!;<>{}\s\x7F-\x\ 7 FF])?)$/;
+var url = "http://www.joergkrause.de:8080/index.php?id=0";
+console.log(patt.test(url));
+
+
+Query String
+===============
+/([ˆ?=&]+)(=([ˆ&]*))?/g
+var uri = 'http://joergkrause.de/index.php?cat=113&prod=2605&query=a\
+press';
+var queryString = {};
+uri.replace(/([^?=&]+)(=([^&]*))?/g, function($0, $1, $2, $3) { queryString[$1] = $3; } );
+
+for (var i in queryString){ 
+	if (!queryString[i]) continue; console.log(i + " = " + queryString[i]);
+}
+
+Port Numbers
+=============
+Port numbers go from 1 to 65535.
+^(4915[0-1] |491[0-4]\d |490\d\d
+|4[0-8]\d{3}
+|[1-3]\d{4} |[2-9]\d{3} |1[1-9]\d{2} |10[3-9]\d |102[4-9])$
+var patt = /^(4915[0-1] 2
+3456789
+|491[0-4]\d |490\d\d
+|4[0-8]\d{3} |[1-3]\d{4} |[2-9]\d{3} |1[1-9]\d{2} |10[3-9]\d
+|102[4-9])$/;
+
+	var port = 1384; 
+	console.log(patt.test(port));
+	port = 75000; 
+	console.log(patt.test(port));
+
+
+
+Manipulating Data
+==========================================================================================	
+Remove Spaces
+=============
+Try searching for ˆ[ \t]+ and replace the spaces and tabs with nothing.
+for the spaces at the end, use : [ \t]+$
+remove spaces at the beginning and the end : ˆ[ \t]+|[ \t]+$
+
+[ \t\r\n] can be abbreviated with the space metacharacter ( \s).
+
+	var patt = /[ \t]+/g;
+	var text = "Here•we•have•many••••Spaces\tand•Tabs•too";
+	text = text.replace(patt, "");
+	console.log(text);
+
+File Extensions
+===============	
+/ˆ.*(([ˆ\.][\.][wW][mM][aA])|([ˆ\.][\.][mM][pP][3]))$
+	looks for *.wma and *.mp3
+	helpful for file upload scenarios.
+	
+Non-Printable Characters
+=========================
+/[\x00-\x1F\x7F]/
+
+Hexadecimal Digits for Colors
+=============================
+/ˆ#(\d{6})|ˆ#([A-F]{6})|ˆ#([A-F]|[0-9]){6}/
+
+Form Validation
+================
+eMail
+------
+\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b
+
+Note: Using functions and options
+1. For removing spaces you can use functions such as trim(), it’s often the better option.
+2. Dealing with letter cases is best handled with the //i option, rather than extended character classes like [A-Za-z].
+
+
+top-level domain
+-----------------
+com or .net, life is easy.
+newer top-level domains include extensions such as .museum and .berlin
+ˆ[A-Z0-9._%+-]+@[A-Z0-9.-]+\. ‘ ‘ (?:[A-Z]{2}|com|org|net|edu|gov|mil)$
+`^[A-Z0-9._%+-]+@[A-Z0-9.-]+ 2 \.(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz 3
+|info|mobi|name|aero|asia|jobs|museum)$`
+
+if you add subdomains
+-----------------------
+\b[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[A-Z]{2,4}\b
+
+
+Date Expressions
+==================
+For American date formats
+--------------------------
+e.g 2015-07-13 or 2015/07/13 or 2015/07-13
+ˆ(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$
+
+
+String Passwords
+=================
+1 lowercase letter
+1 uppercase letter
+1 digit
+1 special char
+At least 6 and max 50 characters long
+/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,50})/i
+
+ISBN
+====
+is a unique identifier for books
+	ISBN 9-783738-62519-6 or 9-783738-62519-6.
+	
+/ˆ(ISBN )?\d-\d{3,6}-\d{3,6}-\d$/
+
+Currencies
+===========
+ˆ\$[+-]?([0-9]+|[0-9]{1,3}(,[0-9]{3})*)(\.[0-9]{1,2})?$
+
+Number Ranges
+================
+to check for 1 to 248.
+----------------------
+[1-248] doesn’t work
+	You must create a chain and check digit by digit.
+	digits use either [0-9] or the \d metacharacter
+
+For 1 to 99
+	1?[1-9]|[1-9][0-9]
+1 to 199
+	1[0-9][0-9] or 	1\d{2}
+200 to 248.
+	2[0-3][0-9]
+240 to 248:
+	24[0-8]
+	
+Floating Point Numbers
+-----------------------
+a simple version (US format):
+[-+]?[0-9]*[.]?[0-9]+
+* makes everything before the decimal point optional
+
+Credit Cards
+============
+Visa: 
+	ˆ4[0-9]{12}(?:[0-9]{3})?$ 
+	All Visa numbers start with “4 and have 16 digits.
+MasterCard: ˆ5[1-5][0-9]{14}$ All MasterCard numbers start with 51 to 55
+and are 16 digits.
+Diners Club: ˆ3(?:0[0-5]|[68][0-9])[0-9]{11}$ Diners Club starts with 300 to
+305 or 36 or 38. They use 14 digits.
+American Express: ˆ3[47][0-9]{13}$ American Express starts with 34 or 37
+(Gold) and have 15 digits.
+
+
+Cards have also have check digits that use the Luhn algorithm
+1 function valid_credit_card(value) { 2
+// Add the former expression here
+if (/[^0-9-\s]+/.test(value)) return false; // The LUHn algorithm
+var nCheck = 0, nDigit = 0, bEven = false; value = value.replace(/\D/g, "");
+for (var n = value.length - 1; n >= 0; n--) { var cDigit = value.charAt(n),
+nDigit = parseInt(cDigit, 10);
+if (bEven) { }
+if ((nDigit *= 2) > 9) nDigit -= 9;
+nCheck += nDigit; bEven = !bEven;
+} return (nCheck % 10) == 0;
+return (nCheck % 10) == 0;
+22 } 23 24 console.log(valid_credit_card('4012888888881881'));
+American Express
+American Express AmEx Corporate
+Diners Club Diners Club MasterCard MasterCard Visa Visa Visa
+Credit Card Number 378282246310005
+371449635398431 378734493671000 30569309025904
+38520000023237 5555555555554444 5105105105105100
+4111111111111111 4012888888881881 4222222222222
+Test Ranges for Credit Cards
+Geo Coordinates
+a simple example:
+ˆ[0-9]{1,2}°[0-9]{1,2}[0-9]{1,2} [NnSs] [0-9]{1,2}°[0-9]{1,2}[0-9]{1,2} [WwEe]$
+handles the traditional forms, such as in 52°31′27″ N 13°24′37″ E.
+var ck_lat = /^(-?[1-8]?\d(?:\.\d{1,18})? 2
+3 var ck_lon = /^(-?(?:1[0-7]|[1-9])?\d(?:\.\d{1,18})? 4
+|90(?:\.0{1,18})?)[EW]?$/i; |180(?:\.0{1,18})?)[NS]?$/i;
+5 6 function check_lat_lon(lat, lon){ 7
+var validLat = ck_lat.test(lat);
+Guid/UUID
+9
+var validLon = ck_lon.test(lon); return (validLat && validLon);
+10 } 11 12 console.log(check_lat_lon("13E", "52N"))
+A guid is a global unique identifier, a 2ˆ128 number, written in 32 hex digits
+[{hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh}] •
+[hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh] •
+[hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh] •
+[0xhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh]
+h means hex digit (0-F)
+/^((?-i:0x)?[A-F0-9]{32}| 2
+3456789
+10 11
+[A-F0-9]{8}[A-F0-9]{4}[A-F0-9]{4}[A-F0-9]{4}[A-F0-9]{12}|
+\{[A-F0-9]{8}[A-F0-9]{4}[A-F0-9]{4}[A-F0-9]{4}[A-F0-9]{12}\})$/i
+Percentages
+simple pattern for US format numbers:
+(?!ˆ0*$)(?!ˆ0*\.0*$)ˆ\d{1,2}(\.\d{1,4})?$
+Characters
+quick reference
+. []
+[ˆ] .
+\ \\ Description Any character
+One out of an inventory of characters One not in the inventory of
+characters
+The dot
+Masking special chars The backslash
+Groups
+()
+(?:) (?=)
+(?=!) Description Counting group. Non-counting groups.
+Lookahead reference. Matches if the next character matches.
+Negative lookahead reference. Matches if the next character does not
+match.
+?*
++
+{zahl} {min,} {,max}
+Meaning 0 – 1 0 – ∞ 1 – ∞
+number min – ∞ 0 – Max
+{min, max} Min – Max
+Operators
+ˆ
+$|
+Zero or one character(s)
+Zero or any number of characters One or any number of characters
+Exact “number” of characters Minimum number of characters
+No or maximum of number of characters Minimum up to maximum
+characters
+Start; with option “m” the beginning of a line End; with option “m” the end
+of a line Logical OR
+Abbreviations
+\t
+\n \r \f \v \s S
+\w W
+\d D
+\b B \0
+\xxx \xdd
+\uxxxx \cxxx
+44 Description Zero or one character(s)
+Zero or any number of characters One or any number of characters
+Exact “number” of characters Minimum number of characters
+No or maximum of number of characters Minimum up to maximum
+characters
+Start; with option “m” the beginning of a line End; with option “m” the end
+of a line Logical OR
+Description
+Tabulator character Newline
+Return (carriage return) Form feed (page break)
+Vertical tabulator
+White space (non-printable character, such as \t, space, \n, \r, \f) Negation
+of \s
+Word character (character from that one build words, especially
+[_a–zA–Z0-9]
+The negation of \w Digit, same as [0–9] Negation of \d
+Word boundary, start and end of word found by recognizing all chars not
+part of \w.
+Negation of \b Null character (physical 0)
+Character value, represented as octal number Character value,
+represented as hexadecimal number
+Unicode character in hexadecimal form Control character, ASCII value
+exec test
+match
+search replace
+split //o
+RegExp method, checks and returns an array RegExp method, checks and
+returns a Boolean String method, array or null
+String method, index of first hit or –1
+String method, replaced string or same if no hit String method, array
+Literal of the RegExp objects (o=Option, see Table A-7)
+JavaScript Functions
+Options
+gm
+i Description Global, continue after first hit
+Multiline, treat line breaks as regular characters Ignore case sensitivity
